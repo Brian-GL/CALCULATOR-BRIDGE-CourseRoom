@@ -1,114 +1,111 @@
-%Función que nos ayuda a realizar el algoritmo 'PolinizacionEvolutiva', el cual nos ayuda a obtener las posibles soluciones de la función objetivo.
+%Funci�n que nos ayuda a realizar el algoritmo 'PolinizacionEvolutiva', el cual nos ayuda a obtener las posibles soluciones de la funci�n objetivo.
 
-%En donde requerimos valores para los siguientes parámetros:
+%En donde requerimos valores para los siguientes par�metros:
 
-%Parámetros generales:
+%Par�metros generales:
 
-%Funcion -> El valor de la función objetivo a optimizar.
-%NumeroDeIteraciones -> El número de iteraciones que el algoritmo realizará para encontrar la posible solución.
-%NumeroDeIndividuos -> El número de individuos a crear y a utilizar en el algoritmo.
-%Minimo -> El vector de límite mínimo de cada valor de la dimensión. 
-%Maximo -> El vector de límite máximo de cada valor de la dimensión.
-%Dimension -> El número de dimensiones que la función presenta.
+%Funcion -> El valor de la funci�n objetivo a optimizar.
+%NumeroDeIteraciones -> El n�mero de iteraciones que el algoritmo realizar� para encontrar la posible soluci�n.
+%NumeroDeIndividuos -> El n�mero de individuos a crear y a utilizar en el algoritmo.
+%Minimo -> El vector de l�mite m�nimo de cada valor de la dimensi�n. 
+%Maximo -> El vector de l�mite m�ximo de cada valor de la dimensi�n.
+%Dimension -> El n�mero de dimensiones que la funci�n presenta.
 
-%Parámetros particulares:
+%Par�metros particulares:
 
-%ParametroDePaso -> Representa el valor del parámetro de paso que los individuos utilizarán (Valor lamdba en el algoritmo de la polinización de la flor).
-%CriterioDeProbabilidad = El criterio de probabilidad que nos ayudará a 'switchear' la polinización global y local.
-%FactorDeAmplificacion -> es el factor amplificación, el cual se encuentra entre el rango de valores 0 <= F <= 2 (Factor De Amplificación en el algoritmo de evolución diferencial).
-%ConstanteDeRecombinacion -> es una constante de recombinación, la cual se encuentra entre los valores [0 1]. Además, esta constante nos sirve para la hora de la cruza (como en el algoritmo de evolución diferencial).
+%ParametroDePaso -> Representa el valor del par�metro de paso que los individuos utilizar�n (Valor lamdba en el algoritmo de la polinizaci�n de la flor).
+%CriterioDeProbabilidad = El criterio de probabilidad que nos ayudar� a 'switchear' la polinizaci�n global y local.
+%FactorDeAmplificacion -> es el factor amplificaci�n, el cual se encuentra entre el rango de valores 0 <= F <= 2 (Factor De Amplificaci�n en el algoritmo de evoluci�n diferencial).
+%ConstanteDeRecombinacion -> es una constante de recombinaci�n, la cual se encuentra entre los valores [0 1]. Adem�s, esta constante nos sirve para la hora de la cruza (como en el algoritmo de evoluci�n diferencial).
 
-%Esta función retorna a Solucion, que es un vector con todos los valores óptimos de cada dimensión, por lo que solución es un vector de Dimensión x 1.
-%Además, retornamos a Población ,que son todos aquellos individuos creados para el algoritmo, utilizado principalmente para graficar los resultados más adelante.
+%Esta funci�n retorna a Solucion, que es un vector con todos los valores �ptimos de cada dimensi�n, por lo que soluci�n es un vector de Dimensi�n x 1.
+%Adem�s, retornamos a Poblaci�n ,que son todos aquellos individuos creados para el algoritmo, utilizado principalmente para graficar los resultados m�s adelante.
 
-%Este algoritmo se basa principalmente en la combinación de los métodos que utilizan los siguientes algoritmos:
-% - Polinización de la flor.
-% - Evolución Diferencial.
-
-
-%En cambio, para esta actividad, se agregaron los parámetros PosicionDeseada y PosicionInicial.
+%Este algoritmo se basa principalmente en la combinaci�n de los m�todos que utilizan los siguientes algoritmos:
+% - Polinizaci�n de la flor.
+% - Evoluci�n Diferencial.
 
 function Solucion = PolinizacionEvolutiva(Funcion,NumeroDeIteraciones,NumeroDeIndividuos, Minimo, Maximo, Dimension, ParametroDePaso, CriterioDeProbabilidad ,FactorDeAmplificacion,ConstanteDeRecombinacion)
 
-    %El primer paso que tendremos que realizar es la inicialización y creación de todos los valores, vectores, matrices , datos, etc. que utilizaremos para optimizar la función objetivo.
+    %El primer paso que tendremos que realizar es la inicializaci�n y creaci�n de todos los valores, vectores, matrices , datos, etc. que utilizaremos para optimizar la funci�n objetivo.
 
-    %     F a s e    D e     I n i c i a l i z a c i ó n     D e     V a l o r e s  %
+    %     F a s e    D e     I n i c i a l i z a c i � n     D e     V a l o r e s  %
     
-    %Creamos la matriz de individuos del algoritmo, lo llamaremos Población:
+    %Creamos la matriz de individuos del algoritmo, lo llamaremos Poblaci�n:
     
-    %La matriz será de tamaño Dimension x NumeroDeIndividuos:
-    Poblacion = zeros(Dimension, NumeroDeIndividuos); %Inicializamos todos los valores en cero, para despúes llenarlos con valores aleatorios dentro del rango especificado.
+    %La matriz ser� de tama�o Dimension x NumeroDeIndividuos:
+    Poblacion = zeros(Dimension, NumeroDeIndividuos); %Inicializamos todos los valores en cero, para desp�es llenarlos con valores aleatorios dentro del rango especificado.
 
-    %Creamos ahora un vector para guardar solamente las evaluaciones de cada individuo de la población en la función objetivo, la llamaremos Evaluaciones:
+    %Creamos ahora un vector para guardar solamente las evaluaciones de cada individuo de la poblaci�n en la funci�n objetivo, la llamaremos Evaluaciones:
     
-    %En este caso tendremos un vector de tamaño Número de individuos, ya que la evaluación es un  valor escalar.
+    %En este caso tendremos un vector de tama�o N�mero de individuos, ya que la evaluaci�n es un  valor escalar.
     Evaluaciones = zeros(1,NumeroDeIndividuos); %Al igual que los valores anteriores, este vector se crea con valores en cero.
     
     %Establecemos el valor de sigma2, el cual es requerido para el vuelo de Levy:
-    Sigma2 = ((gamma(1+ParametroDePaso)/(ParametroDePaso*gamma((1+ParametroDePaso)/2)))*((sin(pi*ParametroDePaso/2))/(2^((ParametroDePaso-1)/2)))) ^ (1/ParametroDePaso); % Aparte, para la creación de este valor usamos la funnción gamma que nos brinda por defecto matlab.
+    Sigma2 = ((gamma(1+ParametroDePaso)/(ParametroDePaso*gamma((1+ParametroDePaso)/2)))*((sin(pi*ParametroDePaso/2))/(2^((ParametroDePaso-1)/2)))) ^ (1/ParametroDePaso); % Aparte, para la creaci�n de este valor usamos la funnci�n gamma que nos brinda por defecto matlab.
 
-    %Ahora, damos paso a la inicialización de los valores de la matriz de  Población y el vector de Evaluaciones:
+    %Ahora, damos paso a la inicializaci�n de los valores de la matriz de  Poblaci�n y el vector de Evaluaciones:
 
-    %Creamos un for desde 1 hasta el número de individuos para almacenar la información respectiva de cada uno de los valores correspondientes.
+    %Creamos un for desde 1 hasta el n�mero de individuos para almacenar la informaci�n respectiva de cada uno de los valores correspondientes.
     for i=1:NumeroDeIndividuos 
-        %Creamos el individuo con un valor aleatorio dentro del rango especificado en los valores Minimo y Maximo dados como parámetros:
+        %Creamos el individuo con un valor aleatorio dentro del rango especificado en los valores Minimo y Maximo dados como par�metros:
         Individuo = Minimo+(Maximo-Minimo).*rand(Dimension,1);
         
-        %Añadimos el nuevo individuo a la población 
+        %A�adimos el nuevo individuo a la poblaci�n 
         Poblacion(:,i) = Individuo;
         
-        %Ahora, en el vector de evaluaciones guardamos la evaluación de este individuo en la función objetivo:
+        %Ahora, en el vector de evaluaciones guardamos la evaluaci�n de este individuo en la funci�n objetivo:
         Evaluaciones(i) = Funcion(Individuo);
     end
     
-    %  F i n   F a s e    D e     I n i c i a l i z a c i ó n     D e     V a l o r e s  %
+    %  F i n   F a s e    D e     I n i c i a l i z a c i � n     D e     V a l o r e s  %
     
     %------------------------------------------------------------------------------------%
     %       F a s e    D e    D e s a r r o l l o    D e l    A l g o r i t m o          %
     
-    %Creamos un for desde 1 hasta el número de iteraciones para desarrollar el algoritmo tal cantidad de veces:
+    %Creamos un for desde 1 hasta el n�mero de iteraciones para desarrollar el algoritmo tal cantidad de veces:
     for iteracion = 1:NumeroDeIteraciones
 
-        %Como primer paso debemos de obtener el índice del mejor individuo de la población, es decir, el que tenga la mejor evaluación en la función:
-        [~,IndiceDelMejor] = min(Evaluaciones);%Para ello nos ayudamos mediante la función min o max, respectivamente.
+        %Como primer paso debemos de obtener el �ndice del mejor individuo de la poblaci�n, es decir, el que tenga la mejor evaluaci�n en la funci�n:
+        [~,IndiceDelMejor] = min(Evaluaciones);%Para ello nos ayudamos mediante la funci�n min o max, respectivamente.
         
-        %Además, podemos actualizar el valor de Solución (el valor de la solución óptima a retornar).
+        %Adem�s, podemos actualizar el valor de Soluci�n (el valor de la soluci�n �ptima a retornar).
         Solucion = Poblacion(:,IndiceDelMejor);
         
-        %Generamos otro for, el que nos ayudará a iterar a cada individuo de la población:
+        %Generamos otro for, el que nos ayudar� a iterar a cada individuo de la poblaci�n:
         for i = 1: NumeroDeIndividuos
             
-            %Establecemos primeramente un valor aleatorio r, tal que 0<=r<=1, con el propósito de seleccionar el tipo de polinización: global o local.
-            r = rand; %Y como lo hemos ido haciendo en cada práctica, lo obtenemos con rand.
+            %Establecemos primeramente un valor aleatorio r, tal que 0<=r<=1, con el prop�sito de seleccionar el tipo de polinizaci�n: global o local.
+            r = rand; %Y como lo hemos ido haciendo en cada pr�ctica, lo obtenemos con rand.
             
-            %Si el valor aleatorio es menor al criterio de probabilidad previamente generado, entonces, realizamos la polinización global.
+            %Si el valor aleatorio es menor al criterio de probabilidad previamente generado, entonces, realizamos la polinizaci�n global.
             if r < CriterioDeProbabilidad
-                %    *Fase De Polinización Global*
+                %    *Fase De Polinizaci�n Global*
                 
-                %Inicializamos este tipo de polinización creando los vectores de u y v de distribución normal requeridos en esta parte:    
-                u = normrnd(0,Sigma2,[Dimension 1]); %Nos apoyamos utilizando la función normrnd que nos brinda matlab, además, utilizamos el valor previamente creado de sigma2
-                v = normrnd(0,1,[Dimension 1]);%En este caso, en v aplicamos una distribución normal con 1 y no con sigma2.
+                %Inicializamos este tipo de polinizaci�n creando los vectores de u y v de distribuci�n normal requeridos en esta parte:    
+                u = normrnd(0,Sigma2,[Dimension 1]); %Nos apoyamos utilizando la funci�n normrnd que nos brinda matlab, adem�s, utilizamos el valor previamente creado de sigma2
+                v = normrnd(0,1,[Dimension 1]);%En este caso, en v aplicamos una distribuci�n normal con 1 y no con sigma2.
 
-                %Despúes, podemos crear ahora si nuestro vector L mediante la fórmula utilizada en el algoritmo de Mantegna:
+                %Desp�es, podemos crear ahora si nuestro vector L mediante la f�rmula utilizada en el algoritmo de Mantegna:
 
                 L = u./ (abs(v).^(1/ParametroDePaso)); %Y como recordaremos, L es un vector y no un escalar, por lo que utilizamos los operadores '.'
 
-                %Ya obtenidos estos valores, podemos ahora crear nuestro nuevo vector de solución candidata:
+                %Ya obtenidos estos valores, podemos ahora crear nuestro nuevo vector de soluci�n candidata:
 
                 SolucionCandidata = Poblacion(:,i) + L.* (Poblacion(:,IndiceDelMejor) - Poblacion(:,i));
 
-                %Generamos en una variable la evaluación de la nueva solución candidata:
+                %Generamos en una variable la evaluaci�n de la nueva soluci�n candidata:
                 EvaluacionSolucionCandidata = Funcion(SolucionCandidata);
 
-                %Si esta nueva evaluación es mejor que la evaluación previa del individuo, entonces actualizamos el individuo por la solución candidata, incluyendo su nueva evaluación.
+                %Si esta nueva evaluaci�n es mejor que la evaluaci�n previa del individuo, entonces actualizamos el individuo por la soluci�n candidata, incluyendo su nueva evaluaci�n.
                 if EvaluacionSolucionCandidata < Evaluaciones(i)
                     Poblacion(:,i) = SolucionCandidata;
                     Evaluaciones(i) = EvaluacionSolucionCandidata;
                 end
 
-              %    *Fin Fase De Polinización Global*
+              %    *Fin Fase De Polinizaci�n Global*
               
-            else %Si no, entonces realizamos evolucion diferencial, el cual se intercambió por el método de la polinización local.
+            else %Si no, entonces realizamos evolucion diferencial, el cual se intercambi� por el m�todo de la polinizaci�n local.
                 
                 %Generamos otro for, para visitar a cada individuo dentro de la poblacion:
                 for j = 1 : NumeroDeIndividuos
@@ -126,21 +123,21 @@ function Solucion = PolinizacionEvolutiva(Funcion,NumeroDeIteraciones,NumeroDeIn
                     while r3 == j || r3 == r1 || r3 == r2
                         r3 = randi([1 NumeroDeIndividuos]);
                     end
-                    %Generamos ahora el vector mutado que el algoritmo de evolución diferencial utiliza [ vi := xr1 + F (xr2 - xr3) ]
+                    %Generamos ahora el vector mutado que el algoritmo de evoluci�n diferencial utiliza [ vi := xr1 + F (xr2 - xr3) ]
                     Vector = Poblacion(:,r1) + FactorDeAmplificacion * (Poblacion(:,r2) - Poblacion(:,r3));
-                    %Generamos un vector auxiliar que nos ayudará a mutar, todo eso dependiento de nuestra constante de recombinación.
+                    %Generamos un vector auxiliar que nos ayudar� a mutar, todo eso dependiento de nuestra constante de recombinaci�n.
                     VectorMutado = zeros(Dimension,1);
                     for k = 1:Dimension
-                        %Si nuestro número random es menor o igual a nuestra constante de recombinación, es así que podemos tomar la parte de la dimensión 'k' del vector para combinar.
+                        %Si nuestro n�mero random es menor o igual a nuestra constante de recombinaci�n, es as� que podemos tomar la parte de la dimensi�n 'k' del vector para combinar.
                         if rand <= ConstanteDeRecombinacion
                             VectorMutado(k) = Vector(k);
-                        else %sino, pasamos el valor del individuo en tal dimensión.
+                        else %sino, pasamos el valor del individuo en tal dimensi�n.
                             VectorMutado(k) = Poblacion(k,j);
                         end
                     end
-                    %Evaluamos el vector mutado en la función:
+                    %Evaluamos el vector mutado en la funci�n:
                     EvaluacionNuevoVector = Funcion(VectorMutado); 
-                    %Si esta nueva evaluación es mejor que la evaluación previa del individuo, entonces actualizamos el individuo por el vector mutado, incluyendo su nueva evaluación.
+                    %Si esta nueva evaluaci�n es mejor que la evaluaci�n previa del individuo, entonces actualizamos el individuo por el vector mutado, incluyendo su nueva evaluaci�n.
                     if EvaluacionNuevoVector < Evaluaciones(j) 
                         Poblacion(:,j) = VectorMutado;
                         Evaluaciones(j) = EvaluacionNuevoVector;
