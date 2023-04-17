@@ -1,3 +1,4 @@
+
 function [Codigo, Mensaje, Resultado] = regresion_polinomial(X, Y)
 
     try
@@ -38,8 +39,8 @@ function [Codigo, Mensaje, Resultado] = regresion_polinomial(X, Y)
                     MatrizDeCoeficientes(i,j) = sum(X.^((j-1)+k));
                 end
                 Igualaciones(i,1) = sum(Y.*X.^k);
-                Minimo(i,1) = -1000;
-                Maximo(i,1) = 1000;
+                Minimo(i,1) = 0;
+                Maximo(i,1) = 100;
                 k = k + 1;
             end
         
