@@ -39,8 +39,8 @@ function [Codigo, Mensaje, Resultado] = regresion_polinomial(X, Y)
                     MatrizDeCoeficientes(i,j) = sum(X.^((j-1)+k));
                 end
                 Igualaciones(i,1) = sum(Y.*X.^k);
-                Minimo(i,1) = 0;
-                Maximo(i,1) = 100;
+                Minimo(i,1) = -(100^i);
+                Maximo(i,1) = (100^i);
                 k = k + 1;
             end
         
@@ -55,7 +55,7 @@ function [Codigo, Mensaje, Resultado] = regresion_polinomial(X, Y)
             FuncionObjetivo = @(z) (0.5/tam) * sum((Igualaciones - FuncionAuxiliar(z)).^2);
         
             NumeroDeIndividuos = 50;
-            NumeroDeIteraciones = 50;
+            NumeroDeIteraciones = 75;
             ParametroDePaso = 1.5;
             CriterioDeProbabilidad = 0.6; %en este caso el criterio de probabilidad esta entre 0.5, ya que en este algoritmo la polinización local (algoritmo de evolución diferencial) genera resultados muy favorables, por lo que es de suma importancia que este método se realize constantemente.
             FactorDeAmplificacion = 1.2;
@@ -80,6 +80,18 @@ function [Codigo, Mensaje, Resultado] = regresion_polinomial(X, Y)
             Mensaje = RegresionPolinomial;
             Resultado = f(TamanoX+1);
 
+            if Resultado < 0 || Resultado > 100
+                DiferenciaLocal = 1000;
+                Seleccion = Resultado;
+                for i=1:TamanoY
+                    Diferencia = abs(Y(i) - Resultado);
+                    if  DiferenciaLocal > Diferencia
+                        DiferenciaLocal = Diferencia;
+                        Seleccion = Y(i);
+                    end
+                end
+                Resultado = Seleccion;
+            end
         end
     catch e
         Codigo = -1;
