@@ -14,46 +14,58 @@ function [Codigo, Mensaje, Resultado] = regresion_polinomial(X, Y)
             Resultado = 0;
         else
 
-            %Definimos por defecto el número de dimensiones a utilizar (que a su vez será el mismo valor del grado de nuestro polinomio):
+            %Definimos por defecto el número de dimensiones a utilizar para la regresión polinomial (que a su vez será el mismo valor del grado de nuestro polinomio):
 
             if TamanoX >= 5
-                Dimension =  4; %Nuestra dimensión máxima será de 4
+                DimensionPolinomial =  4; %Nuestra dimensión máxima será de 4
             else
-                Dimension = TamanoX - 1;
+                DimensionPolinomial = TamanoX - 1;
             end
+
+            %Definimos el número de dimensiones de la regresión lineal, que por defecto será igual a 2:
+            DimensionLineal = 2;
             
-            %Crear el sistema de ecuaciones dinámicamente:
-            MatrizDeCoeficientes = zeros(Dimension,Dimension); 
-            Igualaciones = zeros(Dimension, 1); 
+            %Crear el sistema de ecuaciones dinámicamente para la regresión polinomial:
+            MatrizDeCoeficientes = zeros(DimensionPolinomial,DimensionPolinomial); 
+            Igualaciones = zeros(DimensionPolinomial, 1); 
         
             %Variable auxiliar para llenar las matrices dinámicamente:
             k = 0;
         
-            %Crear los valores mínimos y máximos en una matriz de 1 x Dimension respectivamente:
-            Minimo = zeros(Dimension,1);
-            Maximo = zeros(Dimension,1);
+            %Crear los valores mínimos y máximos en una matriz de 1 x DimensionPolinomial respectivamente para la regresión polinomial:
+            MinimoPolinomial = zeros(DimensionPolinomial,1);
+            MaximoPolinomial = zeros(DimensionPolinomial,1);
+
+            %Crear los valores máximo y mínimo para la regresión lineal:
+            MinimoLineal = [-100;-100];
+            MaximoLineal = [100;100];
 
             %Llenar las matrices, los valores mínimos y máximos:
-            for i = 1:Dimension
-                for j = 1:Dimension
+            for i = 1:DimensionPolinomial
+                for j = 1:DimensionPolinomial
                     MatrizDeCoeficientes(i,j) = sum(X.^((j-1)+k));
                 end
                 Igualaciones(i,1) = sum(Y.*X.^k);
-                Minimo(i,1) = -(100^i);
-                Maximo(i,1) = (100^i);
+                MinimoPolinomial(i,1) = -10000;
+                MaximoPolinomial(i,1) = 10000;
                 k = k + 1;
             end
         
             %Establecemos el tamaño del sistema en una variable, la llamaremos tam;
             tam = size(Igualaciones,1);
         
-            %Establecemos primero una función auxiliar que nos ayudará a multiplicar la matriz de coeficientes por un parámetro 'w'.
+            %Establecemos primero una función auxiliar que nos ayudará a
+            %multiplicar la matriz de coeficientes por un parámetro 'w' para la regresión polinomial:
             FuncionAuxiliar = @(w) MatrizDeCoeficientes * w;
             
             %Ahora, establecemos nuestra función objetivo de la siguiente manera:
             %En donde calculamos el error entre las igualaciones y el individuo 'z', utilizando la fórmula: 1/2m sum i = 0; hasta i < m  de (ei^2);
-            FuncionObjetivo = @(z) (0.5/tam) * sum((Igualaciones - FuncionAuxiliar(z)).^2);
+            FuncionObjetivoPolinomial = @(z) (0.5/tam) * sum((Igualaciones - FuncionAuxiliar(z)).^2);
+
+            %Generamos la función objetivo para la regresión lineal basándonos en el promedio de errores de los puntos:
+            FuncionObjetivoLineal = @(z) (1/(2*TamanoY)) *(sum((Y-(z(1)*X+z(2))).^2));
         
+            %Establecemos los valores por defecto necesarios para el algoritmo de polinización evolutiva de la solución para la regresión polinomial:
             NumeroDeIndividuos = 50;
             NumeroDeIteraciones = 75;
             ParametroDePaso = 1.5;
@@ -61,37 +73,43 @@ function [Codigo, Mensaje, Resultado] = regresion_polinomial(X, Y)
             FactorDeAmplificacion = 1.2;
             ConstanteDeRecombinacion = 0.9;
         
-            Solucion = PolinizacionEvolutiva(FuncionObjetivo,NumeroDeIteraciones,NumeroDeIndividuos, Minimo, Maximo, Dimension, ParametroDePaso, CriterioDeProbabilidad ,FactorDeAmplificacion,ConstanteDeRecombinacion);
+            %Llamar al algoritmo de polinización evolutiva para resolver la regresión polinomial:
+            SolucionPolinomial = PolinizacionEvolutiva(FuncionObjetivoPolinomial,NumeroDeIteraciones,NumeroDeIndividuos, MinimoPolinomial, MaximoPolinomial, DimensionPolinomial, ParametroDePaso, CriterioDeProbabilidad ,FactorDeAmplificacion,ConstanteDeRecombinacion);
+            
+            %Llamar al algoritmo de polinización evolutiva para resolver la regresión lineal:
+            SolucionLineal = PolinizacionEvolutiva(FuncionObjetivoLineal,NumeroDeIteraciones, NumeroDeIndividuos, MinimoLineal, MaximoLineal, DimensionLineal, ParametroDePaso, CriterioDeProbabilidad ,FactorDeAmplificacion,ConstanteDeRecombinacion);
 
+            % Generar la ecuación de regresión polinomial:
             RegresionPolinomial = '';
-            RegresionPolinomial = strcat(RegresionPolinomial,num2str(Solucion(1)));
-            for i = 2:Dimension
-                if sign(Solucion(i)) == 1
-                    RegresionPolinomial = strcat(RegresionPolinomial," + ",num2str(Solucion(i)),"x^",num2str(i-1));
-                elseif sign(Solucion(i)) == -1
-                    RegresionPolinomial = strcat(RegresionPolinomial," ",num2str(Solucion(i)),"x^",num2str(i-1));
+            RegresionPolinomial = strcat(RegresionPolinomial,num2str(SolucionPolinomial(1)));
+            for i = 2:DimensionPolinomial
+                if sign(SolucionPolinomial(i)) == 1
+                    RegresionPolinomial = strcat(RegresionPolinomial," + ",num2str(SolucionPolinomial(i)),"x^",num2str(i-1));
+                elseif sign(SolucionPolinomial(i)) == -1
+                    RegresionPolinomial = strcat(RegresionPolinomial," ",num2str(SolucionPolinomial(i)),"x^",num2str(i-1));
                 end
             end
 
-            modelo = poly2sym(flipud(Solucion));
-            f = matlabFunction(modelo);
+            % Generar la ecuación de regresión lineal:
+            RegresionLineal = strcat(num2str(SolucionLineal(1)),"x + ",num2str(SolucionLineal(2)));
+
+            modelo = poly2sym(flipud(SolucionPolinomial));
+
+            % Generar las funciones de regresión para evaluar:
+            FuncionPolinomial = matlabFunction(modelo);
+            FuncionLineal = @(x) SolucionLineal(1) * x + SolucionLineal(2);
+
+            % Obtener las evaluaciones:
+            ResultadoPolinomial = FuncionPolinomial(TamanoX+1);
+            ResultadoLineal = FuncionLineal(TamanoX+1);
+
+            % Obtener el punto medio entre las evaluaciones como resultado:
+            PuntoMedio = (ResultadoPolinomial + ResultadoLineal).'/2;
 
             Codigo = 1;
-            Mensaje = RegresionPolinomial;
-            Resultado = f(TamanoX+1);
+            Mensaje = strcat("Regresión Polinomial: ",RegresionPolinomial,' | Regresión Lineal: ', RegresionLineal);
+            Resultado = PuntoMedio;
 
-            if Resultado < 0 || Resultado > 100
-                DiferenciaLocal = 1000;
-                Seleccion = Resultado;
-                for i=1:TamanoY
-                    Diferencia = abs(Y(i) - Resultado);
-                    if  DiferenciaLocal > Diferencia
-                        DiferenciaLocal = Diferencia;
-                        Seleccion = Y(i);
-                    end
-                end
-                Resultado = Seleccion;
-            end
         end
     catch e
         Codigo = -1;
