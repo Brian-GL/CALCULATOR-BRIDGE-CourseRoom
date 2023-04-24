@@ -29,11 +29,11 @@ def RegresionPolinomial(model: RegresionPolinomialInputModel):
         return  { "codigo": 400, "mensaje": "El tamaño mínimo de los arreglos debe de ser igual a 2", "resultado": -1 }
 
     future_eng = matlab.engine.start_matlab(background=True)
-    eng = future_eng.result()
-
+    
     x = matlab.double(vector=model.x)
     y = matlab.double(vector=model.y)
 
+    eng = future_eng.result()
     future = eng.regresion_polinomial(x,y, background=True, nargout=3)  
     [Codigo, Mensaje, Resultado] = future.result()
     eng.quit()

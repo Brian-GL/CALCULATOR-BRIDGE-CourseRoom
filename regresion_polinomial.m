@@ -78,7 +78,7 @@ function [Codigo, Mensaje, Resultado] = regresion_polinomial(X, Y)
 
             %Llamar al algoritmo de polinización evolutiva para resolver la regresión lineal:
             SolucionLineal = PolinizacionEvolutiva(FuncionObjetivoLineal,NumeroDeIteraciones, NumeroDeIndividuos, MinimoLineal, MaximoLineal, DimensionLineal, ParametroDePaso, CriterioDeProbabilidad ,FactorDeAmplificacion,ConstanteDeRecombinacion);
-
+            
             % Generar la ecuación de regresión polinomial:
             RegresionPolinomial = '';
             RegresionPolinomial = strcat(RegresionPolinomial,num2str(SolucionPolinomial(1)));
@@ -99,8 +99,14 @@ function [Codigo, Mensaje, Resultado] = regresion_polinomial(X, Y)
             FuncionPolinomial = matlabFunction(modelo);
             FuncionLineal = @(x) SolucionLineal(1) * x + SolucionLineal(2);
 
+            ResultadoPolinomial = 0;
             % Obtener las evaluaciones:
-            ResultadoPolinomial = FuncionPolinomial(TamanoX+1);
+            if DimensionPolinomial > 2
+                ResultadoPolinomial = FuncionPolinomial(TamanoX+1);
+            else
+                ResultadoPolinomial = SolucionPolinomial(1);
+            end
+
             ResultadoLineal = FuncionLineal(TamanoX+1);
 
             % Obtener el punto medio entre las evaluaciones como resultado:
