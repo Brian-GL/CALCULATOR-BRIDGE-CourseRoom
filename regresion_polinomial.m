@@ -75,7 +75,7 @@ function [Codigo, Mensaje, Resultado] = regresion_polinomial(X, Y)
         
             %Llamar al algoritmo de polinización evolutiva para resolver la regresión polinomial:
             SolucionPolinomial = PolinizacionEvolutiva(FuncionObjetivoPolinomial,NumeroDeIteraciones,NumeroDeIndividuos, MinimoPolinomial, MaximoPolinomial, DimensionPolinomial, ParametroDePaso, CriterioDeProbabilidad ,FactorDeAmplificacion,ConstanteDeRecombinacion);
-            
+
             %Llamar al algoritmo de polinización evolutiva para resolver la regresión lineal:
             SolucionLineal = PolinizacionEvolutiva(FuncionObjetivoLineal,NumeroDeIteraciones, NumeroDeIndividuos, MinimoLineal, MaximoLineal, DimensionLineal, ParametroDePaso, CriterioDeProbabilidad ,FactorDeAmplificacion,ConstanteDeRecombinacion);
 
